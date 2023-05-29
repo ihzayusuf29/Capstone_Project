@@ -1,26 +1,28 @@
 import sys
 import pyinputplus as pypi
+import csv
 
 def show(Dict, printFormat, title="\ndaftar profil dalam yellow pages:\n"):
     print(title)
     for value in Dict.values():
+        #BUG
         print(printFormat.format("", *value))
 
 def search():
-    inputId = pypi.inputInt(prompt="Input ID Profile: ", lessThan= len(listPages)-1)
-    for i, value in enumerate(listPages.values()):
+    inputId = pypi.inputInt(prompt="Input ID Profile: ", lessThan= len(dataProfil)-1)
+    for i, value in enumerate(dataProfil.values()):
         if inputId in value:
             print("Info Profil Yang Dicari\n")
             print(f"""ID\t\t : {value[0]}
-Nama depan\t : {value[1]}
-Nama belakang\t : {value[2]}
-usia\t\t : {value[3]}
-no telpon\t : {value[4]}
-Kode pos\t : {value[5]}
+Nama Perusahaan\t : {value[1]}
+Alamat E-mail\t : {value[2]}
+Sektor Bisnis\t : {value[3]}
+No Telpon\t : {value[4]}
+Kode Pos\t : {value[5]}
 Alamat\t\t : {value[6]}\n"""
 )
             break
-        elif i == len(listPages) - 1:
+        elif i == len(dataProfil) - 1:
             print(f"Profil dengan {inputId} tidak dapat ditemukan")
             reportMenu()
 
@@ -34,29 +36,29 @@ Menu Show Yellow Pages:
             ''')
         subReport = pypi.inputInt(prompt="Input menu number [1-3]: ", lessThan= 4)
         if subReport == 1:
-            show(listPages, printFormat)
+            show(dataProfil, printFormat)
         if subReport == 2:
             search()
         if subReport == 3:
             main()
         
 def delete():
-    show(listPages, printFormat)
+    show(dataProfil, printFormat)
     index = pypi.inputInt(
         prompt='Masukkan ID profil yang ingin dihapus: ', 
-        lessThan=len(listPages) - 1
+        lessThan=len(dataProfil) - 1
     )
     confirm = pypi.inputYesNo(prompt='Apakah anda ingin menghapus profil tersebut?(yes/no): ')
     if confirm == "yes":
-        for value in listPages.copy().values():
+        for value in dataProfil.copy().values():
             if index in value:
-                del listPages[f'profil{str(value[0])}']
+                del dataProfil[f'profil{str(value[0])}']
 
-        for key, value in listPages.copy().items():
+        for key, value in dataProfil.copy().items():
             if key != 'column' and value[0] > index:
-                del listPages[key]
-                listPages.update({
-                f'profil{str(value[0]-1)}': [
+                del dataProfil[key]
+                dataProfil.update({
+                f'profil{(value[0]-1)}': [
                     value[0]-1, 
                     value[1], 
                     value[2], 
@@ -67,7 +69,7 @@ def delete():
                 }
             )
         print("data berhasil dihapus")
-        show(listPages, printFormat)  
+        show(dataProfil, printFormat)  
     if confirm == "no":
         deleteMenu   
 
@@ -85,34 +87,34 @@ Menu Menghapus profil Yellow Pages:
             main()
 
 def add():
-    show(listPages, printFormat)
-    indexInput = pypi.inputInt(prompt="Input ID: ", lessThan= len(listPages))
-    for i, value in enumerate(listPages.copy().values()):
+    show(dataProfil, printFormat)
+    indexInput = pypi.inputInt(prompt="Input ID: ", lessThan= len(dataProfil))
+    for i, value in enumerate(dataProfil.copy().values()):
         if indexInput in value: 
             print("ID profil sudah ada dalam yellow pages!")
             addMenu()
             break
-        elif i == len(listPages) - 1:
+        elif i == len(dataProfil) - 1:
             nameInput1 = pypi.inputStr(
-            prompt="Input nama depan: ",
-            applyFunc=lambda x: x.capitalize(),
-            blockRegexes=[r"[0-9]"],
-            )
-            nameInput2 = pypi.inputStr(
-            prompt="Input nama belakang: ",
-            applyFunc=lambda x: x.capitalize(),
-            blockRegexes=[r"[0-9]"],
-            )
-            ageInput = pypi.inputInt(
-            prompt="Input usia: ",
-            )
+            prompt="Input nama perusahaan: ",
+            applyFunc=lambda x: x.capitalize()
+            ,blockRegexes=[r"[0-9]"]
+            ),
+            emailInput = pypi.inputStr(
+            prompt="Input alamat e-mail: ",
+            applyFunc=lambda x: x.capitalize()
+            ),
+            sectorInput = pypi.inputStr(
+            prompt="Input sektor bisnis: ",
+            applyFunc=lambda x: x.capitalize()
+            ),
             numbInput = pypi.inputStr(
             prompt="Input nomor telepon: ",
             blockRegexes=[r"[A-z]"],
-            )
+            ),
             zipInput = pypi.inputInt(
             prompt="Input kode pos: ",
-            )
+            ),
             addInput = pypi.inputStr(
             prompt="Input alamat: ",
             applyFunc=lambda x: x.capitalize(),
@@ -120,10 +122,11 @@ def add():
             )
             confirm = pypi.inputYesNo(prompt='Apakah anda ingin menambah ID profil tersebut?(yes/no): ')
             if confirm == "yes":
-                listPages.update(
-                {f"profil{str(indexInput)}": [indexInput, nameInput1, nameInput2, ageInput, numbInput, zipInput, addInput]}
+                dataProfil.update(
+                {f"profil{indexInput}" : [
+                    indexInput, nameInput1, emailInput, sectorInput, numbInput, zipInput, addInput]}
                 )
-            show(listPages, printFormat)
+            show(dataProfil, printFormat)
             if confirm == "no":
                 addMenu()
 
@@ -141,15 +144,15 @@ Menu Menambah profil Yellow Pages Baru:
             main()
       
 def update():
-    indexInput = pypi.inputInt(prompt="Input ID: ", lessThan= len(listPages)-1)
-    for i, value in enumerate(listPages.copy().values()):
+    indexInput = pypi.inputInt(prompt="Input ID: ", lessThan= len(dataProfil)-1)
+    for i, value in enumerate(dataProfil.copy().values()):
         if indexInput in value: 
 
             print("Info Profil\n")
             print(f"""ID\t\t : {value[0]}
-Nama depan\t : {value[1]}
-Nama belakang\t : {value[2]}
-usia\t\t : {value[3]}
+Nama perusahaan\t : {value[1]}
+Alamat E-Mail\t : {value[2]}
+Sektor Bisnis\t : {value[3]}
 no telpon\t : {value[4]}
 Kode pos\t : {value[5]}
 Alamat\t\t : {value[6]}\n"""
@@ -157,45 +160,45 @@ Alamat\t\t : {value[6]}\n"""
             confirm = pypi.inputYesNo(prompt='Apakah anda ingin memperbarui ID profil tersebut?(yes/no): ')
             if confirm == "yes":
                 nameInput1 = pypi.inputStr(
-                prompt="Input nama depan: ",
+                prompt="Input nama perusahaan: ",
                 applyFunc=lambda x: x.capitalize(),
                 blockRegexes=[r"[0-9]"],
                 )
-                nameInput2 = pypi.inputStr(
-                prompt="Input nama belakang: ",
-                applyFunc=lambda x: x.capitalize(),
-                blockRegexes=[r"[0-9]"],
-                )     
-                ageInput = pypi.inputInt(
-                prompt="Input usia: ",
-                )
+                emailInput = pypi.inputStr(
+                prompt="Input alamat e-mail: ",
+                applyFunc=lambda x: x.capitalize()
+                ),
+                sectorInput = pypi.inputStr(
+                prompt="Input sektor bisnis: ",
+                applyFunc=lambda x: x.capitalize()
+                ),
                 numbInput = pypi.inputStr(
                 prompt="Input nomor telepon: ",
-                blockRegexes=[r"[A-z]"],
-                )
+                blockRegexes=[r"[A-z]"]
+                ),
                 zipInput = pypi.inputInt(
-                prompt="Input kode pos: ",
-                )
+                prompt="Input kode pos: "
+                ),
                 addInput = pypi.inputStr(
                 prompt="Input alamat: ",
                 applyFunc=lambda x: x.capitalize(),
-                blockRegexes=[r"[0-9]"],
+                blockRegexes=[r"[0-9]"]
                 )
             if confirm == "no":
                 updateMenu() 
             confirm = pypi.inputYesNo(prompt='Apakah anda ingin menyimpan update ID profil tersebut?(yes/no): ')
             if confirm == "yes":
-                listPages[f"profil{str(indexInput)}"][1] = nameInput1
-                listPages[f"profil{str(indexInput)}"][2] = nameInput2
-                listPages[f"profil{str(indexInput)}"][3] = ageInput
-                listPages[f"profil{str(indexInput)}"][4] = numbInput
-                listPages[f"profil{str(indexInput)}"][5] = zipInput
-                listPages[f"profil{str(indexInput)}"][6] = addInput
-                show(listPages, printFormat)
+                dataProfil[f"profil{indexInput}"][1] = nameInput1
+                dataProfil[f"profil{indexInput}"][2] = emailInput
+                dataProfil[f"profil{indexInput}"][3] = sectorInput
+                dataProfil[f"profil{indexInput}"][4] = numbInput
+                dataProfil[f"profil{indexInput}"][5] = zipInput
+                dataProfil[f"profil{indexInput}"][6] = addInput
+            show(dataProfil, printFormat)
             if confirm == "no":
                 updateMenu() 
             break
-        elif i == len(listPages) - 1:
+        elif i == len(dataProfil) - 1:
             print("profil tidak ada dalam yellow pages!")
             updateMenu()
 
@@ -228,15 +231,39 @@ def main():
             updateMenu()
         else:
             print("Terimakasih telah menggunakan Yellow Pages app!")
+            #Export data ke csv
+            fileDataProfil = open(pathProfil, 'w', newline='')
+            writerDataProfil = csv.writer(fileDataProfil, delimiter= ';')
+            writerDataProfil.writerows(dataProfil.values())
+            fileDataProfil.close()
+            #Exit apps
             sys.exit()
 
 if __name__ == "__main__":
-    listPages = {
-        'column': ["ID", "Nama depan", "nama belakang", "Umur", "No telpon", "Kode pos", "Alamat"],
-        'profil0': [0, "Adi", "Satu", 20, "081001", 333333, "depok,sleman"],
-        'profil1': [1, "Budi", "Dua", 25, "081002", 444444, "turi,sleman"],
-        'profil2': [2, "Citra", "Tiga", 15, "081003", 555555, "kotagede,yogyakarta"],
-    }
+    #Import database profil dari file csv
+    pathProfil = 'C:/Users/Ihza/Documents/Capstone_Project/Modul1/Data_Profil.csv'
+
+    fileDataProfil = open(pathProfil)
+    readerDataProfil = csv.reader(fileDataProfil, delimiter= ';')
+    headingsDataProfil = next(readerDataProfil)
+
+    dataProfil = {'column': headingsDataProfil}
+    for row in readerDataProfil:
+        dataProfil.update(
+            {
+                str(f'profil{row[0]}') :
+                [int(row[0]),
+                 str(row[1]),
+                 str(row[2]),
+                 str(row[3]),
+                 int(row[4]),
+                 str(row[5]),
+                 str(row[6])
+                 ]
+
+            }
+        )
+
+    printFormat = "{:<4}" + "{:<15}" * (len(dataProfil['column']))
     
-    printFormat = "{:<4}" + "{:<15}" * (len(listPages['column']))
     main()
