@@ -36,6 +36,29 @@ Alamat\t\t : {value[6]}\n"""
             print(f'Profil dengan {inputId} tidak dapat ditemukan')
             reportMenu()
 
+#Fungsi filter berdasarkan kode pos
+def zSearch():
+    header = dataProfil['column'][1:]
+    data = list(dataProfil.values())[1:]          
+    zipSet = {dataProfil[f'profil{index}'][5] for index in range(len(data))}
+    zipList = list(zipSet)
+    
+    choice = []
+    for i in zipList:
+        j = str(i)
+        choice.append(j)
+
+    userInput = pypi.inputMenu(prompt="Pilih kode pos yang ingin difilter\n", choices=choice, numbered=True)
+
+    keysTarget = []
+    for i in data:
+        if str(i[5]) == userInput:
+            keysTarget.append(str(i[0]))
+            dataTarget = []
+            for i in keysTarget:
+                dataTarget.append(dataProfil[f'profil{i}'])
+    print(tabulate.tabulate(dataTarget, headers=header, tablefmt='outline'))
+
 #Fungsi menampilkan submenu show
 def reportMenu():
     while True:
@@ -43,14 +66,17 @@ def reportMenu():
 Menu Show Yellow Pages:
 1. Menampilkan semua profil yellow pages
 2. Mencari profil yellow pages
-3. Kembali ke menu utama \n
+3. Filter berdasarkan Kode pos
+4. Kembali ke menu utama \n
             ''')
-        subReport = pypi.inputInt(prompt= 'Masukkan nomor menu [1-3]: ', lessThan= 4)
+        subReport = pypi.inputInt(prompt= 'Masukkan nomor menu [1-4]: ', lessThan= 5)
         if subReport == 1:
             show(dataProfil)
         if subReport == 2:
             search()
         if subReport == 3:
+            zSearch()
+        if subReport == 4:
             main()
 
 #Fungsi menghapus profil dalam database        
@@ -64,7 +90,7 @@ def delete():
     if confirm == 'yes':
         for value in dataProfil.copy().values():
             if index in value:
-                del dataProfil[f'profil{str(value[0])}']
+                del dataProfil[f'profil{value[0]}']
 
         for key, value in dataProfil.copy().items():
             if key != 'column' and value[0] > index:
@@ -114,16 +140,15 @@ def add():
         elif i == len(dataProfil) - 1:
             nameInput1 = pypi.inputStr(
             prompt = 'Masukkan nama perusahaan: ',
-            applyFunc = lambda x: x.capitalize(),
+            applyFunc = lambda x: x.title(),
             blockRegexes = [r'[0-9]']
             )
-            emailInput = pypi.inputStr(
-            prompt = 'Masukkan alamat e-mail: ',
-            applyFunc = lambda x: x.capitalize()
+            emailInput = pypi.inputEmail(
+            prompt = 'Masukkan alamat email: '
             )
             sectorInput = pypi.inputStr(
             prompt = 'Masukkan sektor bisnis: ',
-            applyFunc = lambda x: x.capitalize(),
+            applyFunc = lambda x: x.title(),
             blockRegexes = [r'[0-9]']
             )
             numbInput = pypi.inputStr(
@@ -131,12 +156,13 @@ def add():
             blockRegexes = [r'[A-z]']
             )
             zipInput = pypi.inputInt(
-            prompt = 'Masukkan kode pos: '
+            prompt = 'Masukkan kode pos: ',
+            blockRegexes = '-'
             )
             addInput = pypi.inputStr(
             prompt = 'Masukkan alamat: ',
-            applyFunc = lambda x: x.capitalize(),
-            blockRegexes = [r'[@#$]']
+            applyFunc = lambda x: x.title(),
+            blockRegexes = [r'[@#$!~%^&*_+=?]']
             )
             confirm = pypi.inputYesNo(prompt='Apakah anda ingin menambah ID profil tersebut?(yes/no): ')
             if confirm == 'yes':
@@ -181,17 +207,14 @@ Alamat\t\t : {value[6]}\n"""
             if confirm == 'yes':
                 nameInput1 = pypi.inputStr(
                 prompt = 'Masukkan nama perusahaan: ',
-                applyFunc = lambda x: x.capitalize(),
-                blockRegexes = [r'[0-9]'],
+                applyFunc = lambda x: x.title()
                 )
-                emailInput = pypi.inputStr(
-                prompt = 'Masukkan alamat email: ',
-                applyFunc = lambda x: x.capitalize(),
-                allowRegexes = [r'[A-Za-z0-9/_/./@]']
+                emailInput = pypi.inputEmail(
+                prompt = 'Masukkan alamat email: '
                 )
                 sectorInput = pypi.inputStr(
                 prompt = 'Masukkan sektor bisnis: ',
-                applyFunc = lambda x: x.capitalize()
+                applyFunc = lambda x: x.title()
                 )
                 numbInput = pypi.inputStr(
                 prompt = 'Masukkan nomor telepon: ',
@@ -202,8 +225,8 @@ Alamat\t\t : {value[6]}\n"""
                 )
                 addInput = pypi.inputStr(
                 prompt = 'Masukkan alamat: ',
-                applyFunc = lambda x: x.capitalize(),
-                blockRegexes = ['!','@','%','_','-']
+                applyFunc = lambda x: x.title(),
+                blockRegexes = [r'[@#$!~%^&*_+=?]']
                 )
             if confirm == 'no':
                 updateMenu() 
@@ -262,8 +285,8 @@ def main():
             #Exit apps
             sys.exit()
 
+#Import database profil dari file csv
 if __name__ == "__main__":
-    #Import database profil dari file csv
     pathProfil = 'C:/Users/Ihza/Documents/Capstone_Project/Modul1/Data_Profil.csv'
 
     fileDataProfil = open(pathProfil)
@@ -279,16 +302,12 @@ if __name__ == "__main__":
                  str(row[1]),
                  str(row[2]),
                  str(row[3]),
-                 int(row[4]),
-                 str(row[5]),
+                 str(row[4]),
+                 int(row[5]),
                  str(row[6])
                  ]
 
             }
         )
-    
+#start program    
     main()
-
-#tabulate ada char aneh sebelum id
-#csv tidak bisa diawali dengan 0 (nomor telp)
-#fungsi block/allow regexes tidak berfungsi
